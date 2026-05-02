@@ -1,0 +1,23 @@
+plugins {
+    kotlin("jvm") version "1.9.22"
+}
+
+group = "org.example"
+version = "unspecified"
+
+dependencies {
+    implementation("com.zaxxer:HikariCP:3.2.0")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.10.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.10.2")
+    implementation("org.postgresql:postgresql:42.2.10")
+
+    testImplementation(kotlin("test"))
+}
+
+kotlin {
+    jvmToolchain(21)
+}
+
+tasks.test {
+    useJUnitPlatform()
+}

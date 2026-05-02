@@ -23,3 +23,19 @@ services:
     environment:
       PORT: 8886
       APP: /opt/applications/data-collector-server.jar
+  rabbitmq:
+    image: rabbitmq:3.10.5-management
+    container_name: email-verifier-rabbit
+    configs:
+      - source: plugins
+        target: /etc/rabbitmq/enabled_plugins
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    volumes:
+      - ./.docker-data/.rabbit-data:/var/lib/rabbitmq/
+      - ./.docker-data/.rabbit-log:/var/log/rabbitmq
+
+configs:
+  plugins:
+    content: "[rabbitmq_consistent_hash_exchange]."

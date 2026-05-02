@@ -1,4 +1,18 @@
-rootProject.name = "kotlin-ktor-starter"
+rootProject.name = "fridge-accountant"
+
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenCentral()
+    }
+}
 
 include(
     "applications:basic-server",
@@ -11,3 +25,7 @@ include(
     "support:logging-support",
     "support:workflow-support"
 )
+
+include("components:rabbit-support")
+include("components:database-support")
+include("components:data-model")
