@@ -13,9 +13,52 @@ class DataGateway(private val dataSource: DataSource) {
     private val template = DatabaseTemplate(dataSource)
     private val transactionManager = TransactionManager(dataSource)
 
+    fun findAllFridges(): List<Fridge> = template.query(
+        sql = "SELECT id, name, height, width, depth FROM fridge",
+        params = {},
+        mapper = { rs -> Fridge(
+            rs.getLong("id"),
+            rs.getString("name"),
+            rs.getInt("height"),
+            rs.getInt("width"),
+            rs.getInt("depth")
+        ) }
+    )
+
+    fun findFridge(fridgeId: Long): Fridge? {
+        return template.query(
+            sql = "SELECT id, name, height, width, depth FROM fridge WHERE id = ?",
+            mapper = { rs -> Fridge(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getInt("height"),
+                rs.getInt("width"),
+                rs.getInt("depth")
+            ) },
+            params = { ps -> ps.setLong(1, fridgeId) }
+        ).firstOrNull()
+    }
+
+    fun findAllItems(): List<Item> = template.query(
+        sql = "SELECT id, name, expiry_date, owner_id FROM item",
+        params = {},
+        mapper = { rs -> Item(
+            rs.getLong("id"),
+            rs.getString("name"),
+            rs.getDate("expiry_date"),
+            rs.getLong("owner_id")
+        ) }
+    )
+
+    fun findAllOwners(): List<Owner> = template.query(
+        sql = "SELECT id, name FROM owner",
+        params = {},
+        mapper = { rs -> Owner(rs.getLong("id"), rs.getString("name")) }
+    )
+
     fun getFridgeContents(fridgeId: Long): List<FridgeRecord> {
         return template.query(
-            sql = "SELECT id, fridge_id, item_id, x, y, z FROM fridge_records WHERE fridge_id = ?",
+            sql = "SELECT id, fridge_id, item_id, x, y, z FROM fridge_record WHERE fridge_id = ?",
             mapper = { rs: ResultSet -> FridgeRecord(
                 rs.getLong("id"),
                 rs.getLong("fridge_id"),
@@ -34,7 +77,7 @@ class DataGateway(private val dataSource: DataSource) {
             
             val id = template.create(
                 connection,
-                sql = "INSERT INTO fridge_records (fridge_id, item_id, x, y, z) VALUES (?, ?, ?, ?, ?)",
+                sql = "INSERT INTO fridge_record (fridge_id, item_id, x, y, z) VALUES (?, ?, ?, ?, ?)",
                 id = { it },
                 fridgeRecord.fridgeId,
                 fridgeRecord.itemId,
@@ -67,9 +110,7 @@ class DataGateway(private val dataSource: DataSource) {
         // Check if position is already occupied
         val existing = template.query(
             connection,
-            sql = "SELECT id FROM fridge_records WHERE fridge_id = ? AND x = ? AND y = ? AND z = ?",
-            mapper = { it.getLong("id") },
-            params = { ps ->
+                sql = "SELECT id FROM fridge_record WHERE fridge_id = ? AND x = ? AND y = ? AND z = ?",
                 ps.setLong(1, fridgeRecord.fridgeId)
                 ps.setInt(2, fridgeRecord.x)
                 ps.setInt(3, fridgeRecord.y)
@@ -85,7 +126,7 @@ class DataGateway(private val dataSource: DataSource) {
     private fun validateItemExists(itemId: Long, connection: java.sql.Connection) {
         val item = template.query(
             connection,
-            sql = "SELECT id FROM items WHERE id = ?",
+            sql = "SELECT id FROM item WHERE id = ?",
             mapper = { it.getLong("id") },
             params = { ps -> ps.setLong(1, itemId) }
         )
@@ -98,7 +139,7 @@ class DataGateway(private val dataSource: DataSource) {
     private fun validateOwnerExists(ownerId: Long, connection: java.sql.Connection) {
         val owner = template.query(
             connection,
-            sql = "SELECT id FROM owners WHERE id = ?",
+            sql = "SELECT id FROM owner WHERE id = ?",
             mapper = { it.getLong("id") },
             params = { ps -> ps.setLong(1, ownerId) }
         )
@@ -111,7 +152,7 @@ class DataGateway(private val dataSource: DataSource) {
     private fun getFridgeDimensions(fridgeId: Long, connection: java.sql.Connection): Triple<Int, Int, Int> {
         val fridgeQuery = template.query(
             connection,
-            sql = "SELECT width, height, depth FROM fridges WHERE id = ?",
+            sql = "SELECT width, height, depth FROM fridge WHERE id = ?",
             mapper = { rs -> Triple(rs.getInt("width"), rs.getInt("height"), rs.getInt("depth")) },
             params = { ps -> ps.setLong(1, fridgeId) }
         )
@@ -125,14 +166,14 @@ class DataGateway(private val dataSource: DataSource) {
 
     fun deleteFromFridge(fridgeRecord: FridgeRecord) {
         template.update(
-            sql = "DELETE FROM fridge_records WHERE id = ?",
+            sql = "DELETE FROM fridge_record WHERE id = ?",
             fridgeRecord.id
         )
     }
 
     fun createFridge(name: String, width: Int, height: Int, depth: Int): Fridge {
         val id = template.create(
-            sql = "INSERT INTO fridges (name, width, height, depth) VALUES (?, ?, ?, ?)",
+            sql = "INSERT INTO fridge (name, width, height, depth) VALUES (?, ?, ?, ?)",
             id = { it },
             name,
             width,
@@ -147,7 +188,7 @@ class DataGateway(private val dataSource: DataSource) {
             // Check if fridge has any items
             val items = template.query(
                 connection,
-                sql = "SELECT id FROM fridge_records WHERE fridge_id = ?",
+                sql = "SELECT id FROM fridge_record WHERE fridge_id = ?",
                 mapper = { it.getLong("id") },
                 params = { ps -> ps.setLong(1, fridgeId) }
             )
@@ -159,7 +200,7 @@ class DataGateway(private val dataSource: DataSource) {
             // Delete the fridge
             template.update(
                 connection,
-                sql = "DELETE FROM fridges WHERE id = ?",
+                sql = "DELETE FROM fridge WHERE id = ?",
                 fridgeId
             )
         }
@@ -171,7 +212,7 @@ class DataGateway(private val dataSource: DataSource) {
             
             val id = template.create(
                 connection,
-                sql = "INSERT INTO items (name, expiry_date, owner_id) VALUES (?, ?, ?)",
+                sql = "INSERT INTO item (name, expiry_date, owner_id) VALUES (?, ?, ?)",
                 id = { it },
                 name,
                 expiryDate,
@@ -186,9 +227,7 @@ class DataGateway(private val dataSource: DataSource) {
             // Check if item is in any fridge
             val records = template.query(
                 connection,
-                sql = "SELECT id FROM fridge_records WHERE item_id = ?",
-                mapper = { it.getLong("id") },
-                params = { ps -> ps.setLong(1, itemId) }
+            sql = "SELECT id FROM fridge_record WHERE item_id = ?",
             )
             
             if (records.isNotEmpty()) {
@@ -198,7 +237,7 @@ class DataGateway(private val dataSource: DataSource) {
             // Delete the item
             template.update(
                 connection,
-                sql = "DELETE FROM items WHERE id = ?",
+                sql = "DELETE FROM item WHERE id = ?",
                 itemId
             )
         }
@@ -206,7 +245,7 @@ class DataGateway(private val dataSource: DataSource) {
 
     fun createOwner(name: String): Owner {
         val id = template.create(
-            sql = "INSERT INTO owners (name) VALUES (?)",
+            sql = "INSERT INTO owner (name) VALUES (?)",
             id = { it },
             name
         )
@@ -218,7 +257,7 @@ class DataGateway(private val dataSource: DataSource) {
             // Check if owner has any items
             val items = template.query(
                 connection,
-                sql = "SELECT id FROM items WHERE owner_id = ?",
+                sql = "SELECT id FROM item WHERE owner_id = ?",
                 mapper = { it.getLong("id") },
                 params = { ps -> ps.setLong(1, ownerId) }
             )
@@ -230,7 +269,7 @@ class DataGateway(private val dataSource: DataSource) {
             // Delete the owner
             template.update(
                 connection,
-                sql = "DELETE FROM owners WHERE id = ?",
+                sql = "DELETE FROM owner WHERE id = ?",
                 ownerId
             )
         }

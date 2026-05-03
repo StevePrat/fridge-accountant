@@ -8,12 +8,15 @@ val ktorVersion: String by project
 
 dependencies {
     implementation(project(":components:data-analyzer"))
+    implementation(project(":components:data-model"))
+    implementation(project(":components:database-support"))
     implementation(project(":support:logging-support"))
     implementation(project(":support:workflow-support"))
 
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-freemarker-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
+    implementation("org.postgresql:postgresql:$postgresVersion")
 
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktorVersion")
 }
