@@ -29,3 +29,5 @@ include(
 include("components:rabbit-support")
 include("components:database-support")
 include("components:data-model")
+include("databases")
+include("databases:fridge-db")
