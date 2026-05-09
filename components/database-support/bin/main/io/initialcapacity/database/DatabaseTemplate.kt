@@ -98,6 +98,7 @@ class DatabaseTemplate(val dataSource: DataSource) {
                 is Long -> statement.setLong(parameterIndex, param)
                 is Boolean -> statement.setBoolean(parameterIndex, param)
                 is LocalDate -> statement.setDate(parameterIndex, Date.valueOf(param))
+                is java.util.Date -> statement.setDate(parameterIndex, Date(param.time))
 
             }
         }

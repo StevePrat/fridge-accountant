@@ -131,3 +131,83 @@ ul {
     font-family: 'Bowlby One', sans-serif;
     font-weight: 700;
 }
+
+.flash {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.flash.success {
+    background-color: #daf5d5;
+    color: #226622;
+}
+
+.flash.error {
+    background-color: #ffd9d9;
+    color: #a12a2a;
+}
+
+.grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}
+
+.form-panel {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.75rem;
+    background: #fafafa;
+}
+
+.form-panel label {
+    display: grid;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.form-panel input,
+.form-panel button {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #ccc;
+    font: inherit;
+}
+
+.form-panel button {
+    cursor: pointer;
+    background: var(--blue);
+    color: white;
+    border-color: transparent;
+}
+
+.inline-form {
+    display: inline-block;
+    margin-left: 0.75rem;
+}
+
+.inline-form button {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.7rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+table th,
+table td {
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.fridge-summary {
+    margin-bottom: 1.5rem;
+}

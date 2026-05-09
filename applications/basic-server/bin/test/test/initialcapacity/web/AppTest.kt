@@ -17,7 +17,7 @@ class AppTest {
     fun testEmptyHome() = testApp {
         val response = client.get("/")
         assertEquals(HttpStatusCode.OK, response.status)
-        assertContains(response.bodyAsText(), "An example application using Kotlin and Ktor")
+        assertContains(response.bodyAsText(), "Fridge management")
     }
 
     private fun testApp(block: suspend ApplicationTestBuilder.(client: HttpClient) -> Unit) {

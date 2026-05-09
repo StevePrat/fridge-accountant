@@ -14,6 +14,7 @@ import io.ktor.server.freemarker.FreeMarker
 import io.ktor.server.freemarker.FreeMarkerContent
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.netty.Netty
+import io.ktor.http.Parameters
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondRedirect
@@ -184,7 +185,7 @@ fun Application.module() {
     }
 }
 
-private fun ApplicationCall.respondRedirectWithResult(url: String, result: Result<String>) {
+private suspend fun ApplicationCall.respondRedirectWithResult(url: String, result: Result<String>) {
     val encoded = result.fold(
         onSuccess = { URLEncoder.encode(it, "UTF-8") },
         onFailure = { URLEncoder.encode(it.message ?: "Unknown error", "UTF-8") }

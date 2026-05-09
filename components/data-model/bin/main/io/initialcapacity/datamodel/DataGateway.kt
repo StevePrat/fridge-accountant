@@ -110,7 +110,9 @@ class DataGateway(private val dataSource: DataSource) {
         // Check if position is already occupied
         val existing = template.query(
             connection,
-                sql = "SELECT id FROM fridge_record WHERE fridge_id = ? AND x = ? AND y = ? AND z = ?",
+            sql = "SELECT id FROM fridge_record WHERE fridge_id = ? AND x = ? AND y = ? AND z = ?",
+            mapper = { rs -> rs.getLong("id") },
+            params = { ps ->
                 ps.setLong(1, fridgeRecord.fridgeId)
                 ps.setInt(2, fridgeRecord.x)
                 ps.setInt(3, fridgeRecord.y)
@@ -227,7 +229,9 @@ class DataGateway(private val dataSource: DataSource) {
             // Check if item is in any fridge
             val records = template.query(
                 connection,
-            sql = "SELECT id FROM fridge_record WHERE item_id = ?",
+                sql = "SELECT id FROM fridge_record WHERE item_id = ?",
+                mapper = { rs -> rs.getLong("id") },
+                params = { ps -> ps.setLong(1, itemId) }
             )
             
             if (records.isNotEmpty()) {

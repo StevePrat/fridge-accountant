@@ -5,6 +5,7 @@ plugins {
 group = "io.initialcapacity.web"
 
 val ktorVersion: String by project
+val postgresVersion: String by project
 
 dependencies {
     implementation(project(":components:data-analyzer"))
