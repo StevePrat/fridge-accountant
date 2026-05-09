@@ -63,8 +63,8 @@ fun Application.module() {
             val contents = gateway.getFridgeContents(fridgeId)
             val items = gateway.findAllItems()
             val owners = gateway.findAllOwners()
-            val itemMap = items.associateBy { it.id }
-            val ownerMap = owners.associateBy { it.id }
+            val itemMap = items.associateBy { it.id.toString() }
+            val ownerMap = owners.associateBy { it.id.toString() }
 
             call.respond(FreeMarkerContent("fridge.ftl", mapOf(
                 "fridge" to fridge,
@@ -144,6 +144,27 @@ fun Application.module() {
             })
         }
 
+        post("/fridge-records/{recordId}/delete") {
+            val recordId = call.parameters["recordId"]?.toLongOrNull()
+
+            if (recordId == null) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid fridge record id")
+                return@post
+            }
+
+            val record = gateway.findFridgeRecord(recordId)
+            if (record == null) {
+                call.respond(HttpStatusCode.NotFound, "Fridge record not found")
+                return@post
+            }
+
+            val fridgeId = record.fridgeId
+            call.respondRedirectWithResult("/fridges/$fridgeId", runCatching {
+                gateway.deleteFromFridge(record)
+                "Item removed successfully."
+            })
+        }
+
         post("/fridges/{id}/delete") {
             val fridgeId = call.parameters["id"]?.toLongOrNull()
             if (fridgeId == null) {
@@ -194,13 +215,17 @@ private suspend fun ApplicationCall.respondRedirectWithResult(url: String, resul
     respondRedirect(target)
 }
 
-private fun homeModel(gateway: DataGateway, parameters: Parameters): Map<String, Any?> = mapOf(
-    "fridges" to gateway.findAllFridges(),
-    "owners" to gateway.findAllOwners(),
-    "items" to gateway.findAllItems(),
-    "message" to parameters["message"],
-    "error" to parameters["error"]
-)
+private fun homeModel(gateway: DataGateway, parameters: Parameters): Map<String, Any?> {
+    val owners = gateway.findAllOwners()
+    return mapOf(
+        "fridges" to gateway.findAllFridges(),
+        "owners" to owners,
+        "ownerMap" to owners.associateBy { it.id.toString() },
+        "items" to gateway.findAllItems(),
+        "message" to parameters["message"],
+        "error" to parameters["error"]
+    )
+}
 
 private fun PipelineContext<Unit, ApplicationCall>.headers(): MutableMap<String, String> {
     val headers = mutableMapOf<String, String>()

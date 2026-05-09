@@ -71,6 +71,21 @@ class DataGateway(private val dataSource: DataSource) {
         )
     }
 
+    fun findFridgeRecord(recordId: Long): FridgeRecord? {
+        return template.query(
+            sql = "SELECT id, fridge_id, item_id, x, y, z FROM fridge_record WHERE id = ?",
+            mapper = { rs: ResultSet -> FridgeRecord(
+                rs.getLong("id"),
+                rs.getLong("fridge_id"),
+                rs.getLong("item_id"),
+                rs.getInt("x"),
+                rs.getInt("y"),
+                rs.getInt("z")
+            )},
+            params = { ps: PreparedStatement -> ps.setLong(1, recordId) }
+        ).firstOrNull()
+    }
+
     fun insertIntoFridge(fridgeRecord: FridgeRecord): FridgeRecord {
         return transactionManager.withTransaction { connection ->
             validateFridgeRecord(fridgeRecord, connection)
