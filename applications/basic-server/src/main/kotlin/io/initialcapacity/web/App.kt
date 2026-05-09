@@ -23,6 +23,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
 import org.slf4j.LoggerFactory
+import java.net.URI
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
@@ -33,10 +34,8 @@ private val dateFormat = SimpleDateFormat("yyyy-MM-dd")
 fun Application.module() {
     logger.info("starting the app")
 
-    val jdbcUrl = System.getenv("DB_URL") ?: "jdbc:postgresql://localhost:5432/fridge_dev"
-    val dbUser = System.getenv("DB_USER") ?: "fridge_user"
-    val dbPassword = System.getenv("DB_PASSWORD") ?: "fridge_password"
-    val gateway = DataGateway(createDatasource(jdbcUrl, dbUser, dbPassword))
+    val databaseConfig = databaseConfig()
+    val gateway = DataGateway(createDatasource(databaseConfig.jdbcUrl, databaseConfig.username, databaseConfig.password))
 
     install(FreeMarker) {
         templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
@@ -204,6 +203,33 @@ fun Application.module() {
         staticResources("/static/styles", "static/styles")
         staticResources("/static/images", "static/images")
     }
+}
+
+private data class DatabaseConfig(val jdbcUrl: String, val username: String, val password: String)
+
+private fun databaseConfig(): DatabaseConfig {
+    val jdbcUrl = System.getenv("DB_URL")
+    val dbUser = System.getenv("DB_USER")
+    val dbPassword = System.getenv("DB_PASSWORD")
+    if (jdbcUrl != null && dbUser != null && dbPassword != null) {
+        return DatabaseConfig(jdbcUrl, dbUser, dbPassword)
+    }
+
+    val databaseUrl = System.getenv("DATABASE_URL")
+    if (databaseUrl != null) {
+        val uri = URI(databaseUrl)
+        val userInfo = uri.userInfo?.split(":", limit = 2).orEmpty()
+        val username = userInfo.getOrNull(0).orEmpty()
+        val password = userInfo.getOrNull(1).orEmpty()
+        val jdbc = "jdbc:postgresql://${uri.host}:${uri.port}${uri.path}?sslmode=require"
+        return DatabaseConfig(jdbc, username, password)
+    }
+
+    return DatabaseConfig(
+        "jdbc:postgresql://localhost:5432/fridge_dev",
+        "fridge_user",
+        "fridge_password"
+    )
 }
 
 private suspend fun ApplicationCall.respondRedirectWithResult(url: String, result: Result<String>) {
