@@ -15,3 +15,7 @@ subprojects {
         testImplementation(kotlin("test-junit"))
     }
 }
+
+tasks.register("stage") {
+    dependsOn(":applications:basic-server:jar")
+}
