@@ -20,7 +20,7 @@ COPY applications/basic-server/build/libs/basic-server.jar /opt/applications/
 COPY applications/data-analyzer-server/build/libs/data-analyzer-server.jar /opt/applications/
 COPY applications/data-collector-server/build/libs/data-collector-server.jar /opt/applications/
 
-CMD java
+CMD java \
   -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd'T'HH:mm:ssZ", \
   -Dorg.slf4j.simpleLogger.showDateTime=true,  \
   -Dorg.slf4j.simpleLogger.showShortLogName=true,  \

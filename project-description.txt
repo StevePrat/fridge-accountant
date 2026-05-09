@@ -1,0 +1,28 @@
+App Name: Fridge Accountant
+
+Rough description:
+  - In a shared apartment, there is usually one fridge that is shared among the occupants. 
+  - This app would help the occupants keep track which sections of the fridge are free/occupied by whom, so that each person can plan their purchases accordingly.
+  - This app would help avoid expiring food/drinks in the fridge by alerting the user when an item is nearing its expiry.
+  - This app would also remind the user of what items they still have in the fridge while the user is shopping for groceries/food/drinks outside.
+  - Real world implementation could be by integrating the app into a smart fridge, or having a tablet placed at the door of the fridge.
+    - For stricter control, the fridge door can be configured to lock & unlock only when the user performs a valid action in the app (e.g. insert/remove item).
+    - This could prevent (to some degree) the records in the app being mismatched with the reality in the fridge due to negligence or abuse.
+
+Rough technical sketch:
+  - Fridge is divided into sections/parts. Imagine a fridge with multiple levels and a grid for each level.
+  - Parts of the fridge can be occupied by items
+  - Item has name, owner, expiry date
+  - User can put item in the fridge
+    - User must indicate the item name, expiration date, location in the fridge
+  - User can remove item from the fridge
+  - User can view the current state of the fridge
+    - Which parts of the fridge is occupied/free
+    - How much space is occupied by each user
+    - Filter for already expired or soon expiring items in the fridge
+  - User can be notified when an item owned by the user is expiring soon or already expired
+  - There would be 2 front ends, 1 for the fridge, 1 for remote monitoring
+    - Only the fridge front end can perform item insertion to or removal from the fridge
+    - Remote monitoring front end can only display the current state of the fridge
+  - As a starter, proper authentication & permission control will not be implemented yet to keep the project simple
+  - Future improvement idea: feature to book the space in the fridge in advance to avoid conflicts
