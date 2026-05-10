@@ -1,5 +1,7 @@
 package io.initialcapacity.analyzer
 
+import io.initialcapacity.database.createDatasource
+import io.initialcapacity.datamodel.DataGateway
 import io.initialcapacity.workflow.WorkScheduler
 import io.ktor.http.ContentType
 import io.ktor.server.application.Application
@@ -18,7 +20,17 @@ fun Application.module() {
             call.respondText("hi!", ContentType.Text.Html)
         }
     }
-    val scheduler = WorkScheduler<ExampleTask>(ExampleWorkFinder(), mutableListOf(ExampleWorker()), 30)
+
+    val jdbcUrl = System.getenv("DB_URL") ?: "jdbc:postgresql://localhost:5432/fridge_dev"
+    val dbUser = System.getenv("DB_USER") ?: "fridge_user"
+    val dbPassword = System.getenv("DB_PASSWORD") ?: "fridge_password"
+    val gateway = DataGateway(createDatasource(jdbcUrl, dbUser, dbPassword))
+    val analysisService = FridgeAnalysisService(gateway)
+    val scheduler = WorkScheduler(
+        FridgeAnalysisWorkFinder(gateway),
+        mutableListOf(FridgeAnalysisWorker(analysisService)),
+        3600
+    )
     scheduler.start()
 }
 
