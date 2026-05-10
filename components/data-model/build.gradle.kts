@@ -7,13 +7,8 @@ version = "unspecified"
 
 dependencies {
     implementation(project(":components:database-support"))
-    testImplementation(kotlin("test"))
 }
 
 kotlin {
     jvmToolchain(21)
-}
-
-tasks.test {
-    useJUnitPlatform()
 }

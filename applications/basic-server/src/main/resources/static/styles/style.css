@@ -64,7 +64,7 @@ a:hover {
     text-decoration: underline;
 }
 
-h1, h2, h3, h4 {
+h1, h2, h3, h4, h5 {
     margin-bottom: 1rem;
     font-weight: 700;
 }
@@ -84,6 +84,11 @@ h3 {
 
 h4 {
     font-size: .8rem;
+}
+
+h5 {
+    font-size: .95rem;
+    margin-top: 1.25rem;
 }
 
 p {
@@ -210,4 +215,125 @@ table td {
 
 .fridge-summary {
     margin-bottom: 1.5rem;
+}
+
+.analysis-section {
+    padding-top: 0;
+}
+
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.analysis-card {
+    border: 1px solid #d9dde7;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    padding: 1rem;
+}
+
+.analysis-card-wide {
+    margin-bottom: 1.5rem;
+}
+
+.analysis-card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.analysis-card-header h4 {
+    margin-bottom: 0.5rem;
+}
+
+.analysis-card-header span {
+    color: #586069;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.meter {
+    height: 0.6rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #edf0f5;
+    margin-bottom: 1rem;
+}
+
+.meter span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #2f855a;
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.metric-grid div {
+    border: 1px solid #e4e7ee;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    background: #fbfcfe;
+}
+
+.metric-grid dt {
+    color: #586069;
+    font-size: 0.8rem;
+    margin-bottom: 0.35rem;
+}
+
+.metric-grid dd {
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.analysis-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.5rem;
+}
+
+.compact-list li {
+    margin-left: 1rem;
+    margin-top: 0.45rem;
+    font-size: 0.95rem;
+}
+
+.risk-list strong {
+    color: #a12a2a;
+}
+
+.small-text {
+    color: #586069;
+    font-size: 0.95rem;
+}
+
+.compact-table th,
+.compact-table td {
+    padding: 0.55rem 0.75rem;
+    font-size: 0.95rem;
+}
+
+@media (max-width: 42rem) {
+    .container {
+        padding: 0 1rem;
+    }
+
+    .metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .analysis-card-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
 }
