@@ -18,6 +18,85 @@
                 <p><a href="/">Back to dashboard</a></p>
             </div>
 
+            <section class="analysis-section">
+                <h3>Analysis for ${fridge.name}</h3>
+                <article class="analysis-card analysis-card-wide">
+                    <div class="analysis-card-header">
+                        <h4>Space utilization</h4>
+                        <span>${analysis.occupancyPercentage}% full</span>
+                    </div>
+
+                    <div class="meter" aria-label="Fridge occupancy">
+                        <span style="width: ${analysis.occupancyPercentage}%"></span>
+                    </div>
+
+                    <dl class="metric-grid">
+                        <div>
+                            <dt>Capacity</dt>
+                            <dd>${analysis.totalSlots}</dd>
+                        </div>
+                        <div>
+                            <dt>Occupied</dt>
+                            <dd>${analysis.occupiedSlots}</dd>
+                        </div>
+                        <div>
+                            <dt>Free</dt>
+                            <dd>${analysis.freeSlots}</dd>
+                        </div>
+                        <div>
+                            <dt>Risk items</dt>
+                            <dd>${analysis.expiryRisk.totalRiskItems}</dd>
+                        </div>
+                    </dl>
+
+                    <div class="analysis-columns">
+                        <div>
+                            <h5>Owner usage</h5>
+                            <#if analysis.ownerUsage?size == 0>
+                                <p class="small-text">No placed items.</p>
+                            <#else>
+                                <table class="compact-table">
+                                    <thead>
+                                        <tr><th>Owner</th><th>Slots</th><th>Fridge share</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <#list analysis.ownerUsage as usage>
+                                            <tr>
+                                                <td>${usage.ownerName}</td>
+                                                <td>${usage.occupiedSlots}</td>
+                                                <td>${usage.occupancyPercentage}%</td>
+                                            </tr>
+                                        </#list>
+                                    </tbody>
+                                </table>
+                            </#if>
+                        </div>
+
+                        <div>
+                            <h5>Expiry risk</h5>
+                            <#if analysis.expiryRisk.totalRiskItems == 0>
+                                <p class="small-text">No placed items expiring within seven days.</p>
+                            <#else>
+                                <ul class="compact-list risk-list">
+                                    <#list analysis.expiryRisk.expiredItems as riskItem>
+                                        <li><strong>Expired:</strong> ${riskItem.itemName} owned by ${riskItem.ownerName} (${riskItem.expiryDate})</li>
+                                    </#list>
+                                    <#list analysis.expiryRisk.expiringTodayItems as riskItem>
+                                        <li><strong>Today:</strong> ${riskItem.itemName} owned by ${riskItem.ownerName}</li>
+                                    </#list>
+                                    <#list analysis.expiryRisk.expiringWithinThreeDaysItems as riskItem>
+                                        <li><strong>${riskItem.daysUntilExpiry} days:</strong> ${riskItem.itemName} owned by ${riskItem.ownerName}</li>
+                                    </#list>
+                                    <#list analysis.expiryRisk.expiringWithinSevenDaysItems as riskItem>
+                                        <li><strong>${riskItem.daysUntilExpiry} days:</strong> ${riskItem.itemName} owned by ${riskItem.ownerName}</li>
+                                    </#list>
+                                </ul>
+                            </#if>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
             <section>
                 <h3>Contents</h3>
                 <#if contents?size == 0>
