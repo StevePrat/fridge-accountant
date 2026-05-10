@@ -1,10 +1,12 @@
 package io.initialcapacity.web
 
 import freemarker.cache.ClassTemplateLoader
+import io.initialcapacity.analyzer.FridgeAnalysisService
 import io.initialcapacity.database.createDatasource
 import io.initialcapacity.datamodel.DataGateway
 import io.initialcapacity.datamodel.FridgeRecord
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Parameters
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -14,7 +16,6 @@ import io.ktor.server.freemarker.FreeMarker
 import io.ktor.server.freemarker.FreeMarkerContent
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.netty.Netty
-import io.ktor.http.Parameters
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondRedirect
@@ -37,6 +38,7 @@ fun Application.module() {
     val dbUser = System.getenv("DB_USER") ?: "fridge_user"
     val dbPassword = System.getenv("DB_PASSWORD") ?: "fridge_password"
     val gateway = DataGateway(createDatasource(jdbcUrl, dbUser, dbPassword))
+    val analysisService = FridgeAnalysisService(gateway)
 
     install(FreeMarker) {
         templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
@@ -44,7 +46,7 @@ fun Application.module() {
 
     install(Routing) {
         get("/") {
-            call.respond(FreeMarkerContent("index.ftl", homeModel(gateway, call.request.queryParameters)))
+            call.respond(FreeMarkerContent("index.ftl", homeModel(gateway, analysisService, call.request.queryParameters)))
         }
 
         get("/fridges/{id}") {
@@ -72,6 +74,7 @@ fun Application.module() {
                 "items" to items,
                 "itemMap" to itemMap,
                 "ownerMap" to ownerMap,
+                "analysis" to analysisService.analyzeFridge(fridge, contents, items, owners),
                 "message" to call.request.queryParameters["message"],
                 "error" to call.request.queryParameters["error"]
             )))
@@ -215,13 +218,22 @@ private suspend fun ApplicationCall.respondRedirectWithResult(url: String, resul
     respondRedirect(target)
 }
 
-private fun homeModel(gateway: DataGateway, parameters: Parameters): Map<String, Any?> {
+private fun homeModel(
+    gateway: DataGateway,
+    analysisService: FridgeAnalysisService,
+    parameters: Parameters
+): Map<String, Any?> {
+    val fridges = gateway.findAllFridges()
     val owners = gateway.findAllOwners()
+    val items = gateway.findAllItems()
+    val analyses = analysisService.analyzeFridges(fridges, items, owners)
+
     return mapOf(
-        "fridges" to gateway.findAllFridges(),
+        "fridges" to fridges,
         "owners" to owners,
         "ownerMap" to owners.associateBy { it.id.toString() },
-        "items" to gateway.findAllItems(),
+        "items" to items,
+        "analyses" to analyses,
         "message" to parameters["message"],
         "error" to parameters["error"]
     )
