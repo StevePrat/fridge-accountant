@@ -3,7 +3,12 @@ package io.initialcapacity.web
 import freemarker.cache.ClassTemplateLoader
 import io.initialcapacity.database.createDatasource
 import io.initialcapacity.datamodel.DataGateway
+import io.initialcapacity.datamodel.Fridge
+import io.initialcapacity.datamodel.FridgeAnalysis
+import io.initialcapacity.datamodel.FridgeAnalysisCalculator
 import io.initialcapacity.datamodel.FridgeRecord
+import io.initialcapacity.datamodel.Item
+import io.initialcapacity.datamodel.Owner
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
@@ -72,6 +77,7 @@ fun Application.module() {
                 "items" to items,
                 "itemMap" to itemMap,
                 "ownerMap" to ownerMap,
+                "analysis" to analyzeFridge(fridge, contents, items, owners),
                 "message" to call.request.queryParameters["message"],
                 "error" to call.request.queryParameters["error"]
             )))
@@ -216,16 +222,30 @@ private suspend fun ApplicationCall.respondRedirectWithResult(url: String, resul
 }
 
 private fun homeModel(gateway: DataGateway, parameters: Parameters): Map<String, Any?> {
+    val fridges = gateway.findAllFridges()
     val owners = gateway.findAllOwners()
+    val items = gateway.findAllItems()
+    val analyses = fridges.map { fridge ->
+        analyzeFridge(fridge, gateway.getFridgeContents(fridge.id), items, owners)
+    }
+
     return mapOf(
-        "fridges" to gateway.findAllFridges(),
+        "fridges" to fridges,
         "owners" to owners,
         "ownerMap" to owners.associateBy { it.id.toString() },
-        "items" to gateway.findAllItems(),
+        "items" to items,
+        "analyses" to analyses,
         "message" to parameters["message"],
         "error" to parameters["error"]
     )
 }
+
+private fun analyzeFridge(
+    fridge: Fridge,
+    contents: List<FridgeRecord>,
+    items: List<Item>,
+    owners: List<Owner>
+): FridgeAnalysis = FridgeAnalysisCalculator.analyze(fridge, contents, items, owners)
 
 private fun PipelineContext<Unit, ApplicationCall>.headers(): MutableMap<String, String> {
     val headers = mutableMapOf<String, String>()
